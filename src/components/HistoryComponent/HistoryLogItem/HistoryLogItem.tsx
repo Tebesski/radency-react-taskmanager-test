@@ -23,17 +23,25 @@ export default function HistoryLogItem({ logItem }: { logItem: LogModel }) {
       old_value,
    } = logItem
 
+   const oldList: TaskListModel | undefined = taskList.find(
+      (list) => list.task_list_id === old_value
+   )
+   const newList: TaskListModel | undefined = taskList.find(
+      (list) => list.task_list_id === new_value
+   )
+
    function getField(field: string) {
       if (!field) {
          return ""
       }
-      return field.replace(/^(task_|task_list_)/, " ")
+      return field.replace(/^(task_|task_list_)/, " ").replace(/_/g, " ")
    }
 
    const actionTexts: Record<string, string> = {
       CREATE: "created ",
       DELETE: "deleted ",
       RENAME: "renamed ",
+      UPDATE: "renamed ",
       UPD_PRIORITY: "updated ",
       UPD_DESCRIPTION: "updated ",
       UPD_DUE_DATE: "updated ",
@@ -41,11 +49,16 @@ export default function HistoryLogItem({ logItem }: { logItem: LogModel }) {
    }
 
    const additionalTexts: Record<string, string> = {
-      RENAME: `from ${old_value} to ${new_value}`,
+      RENAME: ` to ${new_value}`,
 
-      UPD_PRIORITY: `${getField(
-         entity_field
-      )} from ${old_value} to ${new_value}`,
+      UPDATE: ` to ${new_value}`,
+
+      UPD_PRIORITY: `${getField(entity_field)} from ${old_value} to ${
+         ["MEDIUM", "HIGH", "LOW"].includes(new_value)
+            ? new_value.charAt(0).toUpperCase() +
+              new_value.slice(1).toLowerCase()
+            : new_value
+      }`,
 
       UPD_DESCRIPTION: `${getField(
          entity_field
@@ -55,7 +68,7 @@ export default function HistoryLogItem({ logItem }: { logItem: LogModel }) {
          entity_field
       )} from ${old_value} to ${new_value}`,
 
-      MOVE: `from ${old_value} to ${new_value}`,
+      MOVE: ` from 🗎 ${oldList?.task_list_name} to 🗎 ${newList?.task_list_name}`,
    }
 
    const getEntityNameText = (type: string, id: string) => {
@@ -63,12 +76,12 @@ export default function HistoryLogItem({ logItem }: { logItem: LogModel }) {
          const task: TaskCardModel | undefined = tasks.find(
             (task) => task.task_id === id
          )
-         return "◎ " + (task?.task_name || old_value || new_value)
+         return "◎ " + (old_value || new_value || task?.task_name)
       } else if (type === "Task list") {
          const list: TaskListModel | undefined = taskList.find(
             (list) => list.task_list_id === id
          )
-         return "🗎 " + (list?.task_list_name || old_value || new_value)
+         return "🗎 " + (old_value || list?.task_list_name || new_value)
       } else {
          return "_"
       }

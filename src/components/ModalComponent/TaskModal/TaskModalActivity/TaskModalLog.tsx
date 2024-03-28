@@ -31,7 +31,9 @@ export default function TaskModalLog({ logItem }: { logItem: LogModel }) {
 
    const additionalTexts: Record<string, string> = {
       RENAME: `from ${String(old_value)} to ${String(new_value)}`,
-      UPD_PRIORITY: `from ${old_value} to ${new_value}`,
+      UPD_PRIORITY: `from ${old_value} to ${
+         new_value.charAt(0).toUpperCase() + new_value.slice(1).toLowerCase()
+      }`,
       UPD_DESCRIPTION: `from ${old_value} to ${new_value}`,
       UPD_DUE_DATE: `from ${old_value} to ${new_value}`,
       MOVE: `from 🗎 ${oldList?.task_list_name} to 🗎 ${newList?.task_list_name}`,

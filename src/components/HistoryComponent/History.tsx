@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { forwardRef, useEffect } from "react"
+import { forwardRef, useEffect, useState } from "react"
 import { Dialog, Slide } from "@mui/material"
 import { TransitionProps } from "@mui/material/transitions"
 
@@ -10,6 +10,7 @@ import HistoryLogItem from "./HistoryLogItem/HistoryLogItem"
 import { RootState } from "../../reducers/root-reducer"
 import { fetchLogs } from "../../api/api"
 import { setAllLogsLoading, setLogs } from "../../reducers/log.reducer"
+import LogModel from "../../models/Log.model"
 
 type HistoryProps = { isOpen: boolean; onCloseHistory: () => void }
 
@@ -27,20 +28,22 @@ export default function History({ isOpen, onCloseHistory }: HistoryProps) {
    const { log } = useSelector((state: RootState) => state.logSlice)
 
    useEffect(() => {
-      async function getLogs() {
-         try {
-            const logs = await fetchLogs()
-            if (logs) {
+      if (isOpen) {
+         async function getLogs() {
+            try {
                dispatch(setAllLogsLoading(true))
-               dispatch(setLogs({ log: logs }))
+               const logs = await fetchLogs()
+               if (logs) {
+                  dispatch(setLogs({ log: logs }))
+               }
                dispatch(setAllLogsLoading(false))
+            } catch (error) {
+               console.error(`Failed to fetch logs with getLogs()`, error)
             }
-         } catch (error) {
-            console.error(`Failed to fetch logs with getLogs()`, error)
          }
+         getLogs()
       }
-      getLogs()
-   }, [])
+   }, [isOpen, dispatch])
 
    return (
       <Dialog
